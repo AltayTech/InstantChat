@@ -60,13 +60,18 @@ class AuthRepository {
 
   Future<void> logout() async {
     final uid = _auth.currentUser?.uid;
-    if (uid != null) {
-      await _firestore.collection('users').doc(uid).update({
-        'isOnline': false,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+    try {
+      if (uid != null) {
+        await _firestore.collection('users').doc(uid).set({
+          'isOnline': false,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+    } catch (_) {
+      // Ignore Firestore update failures on logout
+    } finally {
+      await _auth.signOut();
     }
-    await _auth.signOut();
   }
 
   fb_auth.User? get currentUser => _auth.currentUser;
