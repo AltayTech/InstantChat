@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import '../navigation/app_navigator.dart';
 
 @pragma('vm:entry-point')
@@ -28,7 +29,31 @@ class NotificationService {
     );
 
     await _messaging.requestPermission();
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    final androidImplementation = _local
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    await androidImplementation?.requestNotificationsPermission();
+    await androidImplementation?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        'chat_messages',
+        'Chat Messages',
+        importance: Importance.high,
+      ),
+    );
+    await _messaging.setAutoInitEnabled(true);
+    await _messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    final token = await _messaging.getToken();
+    if (token != null) {
+      debugPrint('FCM token: ' + token);
+    }
+    _messaging.onTokenRefresh.listen((newToken) {
+      debugPrint('FCM token refreshed: ' + newToken);
+    });
     FirebaseMessaging.onMessage.listen((message) {
       final title = message.notification?.title ?? 'New message';
       final body = message.notification?.body ?? '';

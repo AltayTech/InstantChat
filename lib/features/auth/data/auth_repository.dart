@@ -9,7 +9,18 @@ class AuthRepository {
     required FirebaseMessaging messaging,
   }) : _auth = auth,
        _firestore = firestore,
-       _messaging = messaging;
+       _messaging = messaging {
+    _messaging.onTokenRefresh.listen((token) async {
+      final uid = _auth.currentUser?.uid;
+      if (uid == null) return;
+      try {
+        await _firestore.collection('users').doc(uid).set({
+          'fcmToken': token,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      } catch (_) {}
+    });
+  }
 
   final fb_auth.FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
@@ -49,9 +60,11 @@ class AuthRepository {
       password: password,
     );
     final uid = cred.user!.uid;
+    final token = await _messaging.getToken();
     await _firestore.collection('users').doc(uid).set({
       'uid': uid,
       'email': cred.user!.email ?? email,
+      'fcmToken': token,
       'isOnline': true,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
