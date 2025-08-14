@@ -4,7 +4,29 @@ import '../navigation/app_navigator.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Intentionally left minimal; navigation happens when app opens.
+  // Show a notification only when the app is in background and the message
+  // does not already contain a notification payload that the OS would show.
+  // This prevents duplicate notifications when the FCM payload includes
+  // the `notification` object.
+  if (message.notification != null) {
+    return;
+  }
+
+  final title = message.data['title'] as String? ?? 'New message';
+  final body = message.data['body'] as String? ?? '';
+  final chatId = message.data['chatId'] as String?;
+
+  const androidDetails = AndroidNotificationDetails(
+    'chat_messages',
+    'Chat Messages',
+    importance: Importance.high,
+    priority: Priority.high,
+  );
+  const details = NotificationDetails(android: androidDetails);
+
+  final FlutterLocalNotificationsPlugin localNotifications =
+      FlutterLocalNotificationsPlugin();
+  await localNotifications.show(0, title, body, details, payload: chatId);
 }
 
 class NotificationService {
@@ -28,12 +50,16 @@ class NotificationService {
     );
 
     await _messaging.requestPermission();
+    // Do not present alerts when app is in foreground on iOS.
+    await _messaging.setForegroundNotificationPresentationOptions(
+      alert: false,
+      badge: false,
+      sound: false,
+    );
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    // Foreground: do not show a notification. UI will update via streams.
     FirebaseMessaging.onMessage.listen((message) {
-      final title = message.notification?.title ?? 'New message';
-      final body = message.notification?.body ?? '';
-      final chatId = message.data['chatId'] as String?;
-      showLocalNotification(title: title, body: body, payload: chatId);
+      // Intentionally no-op to avoid notifications in foreground.
     });
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
       final chatId = message.data['chatId'] as String?;

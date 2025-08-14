@@ -49,10 +49,12 @@ class AuthRepository {
       password: password,
     );
     final uid = cred.user!.uid;
+    final token = await _messaging.getToken();
     await _firestore.collection('users').doc(uid).set({
       'uid': uid,
       'email': cred.user!.email ?? email,
       'isOnline': true,
+      if (token != null) 'fcmToken': token,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
     return cred;
