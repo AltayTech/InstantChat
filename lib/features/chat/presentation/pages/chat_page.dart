@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/di/injector.dart';
+import '../../../../core/navigation/app_navigator.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../presentation/bloc/chat_bloc.dart';
 
@@ -24,12 +25,21 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
+    setActiveChatId(widget.chatId);
     _scrollController.addListener(() {
       final shouldShow = _scrollController.position.pixels > 200;
       if (shouldShow != _showScrollToBottom) {
         setState(() => _showScrollToBottom = shouldShow);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    setActiveChatId(null);
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   String _formatDateHeader(DateTime dateOnly) {

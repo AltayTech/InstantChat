@@ -68,10 +68,11 @@ class NotificationService {
       ),
     );
     await _messaging.setAutoInitEnabled(true);
+    // Disable OS banners for iOS foreground; we control presentation via local notifications
     await _messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
+      alert: false,
       badge: true,
-      sound: true,
+      sound: false,
     );
     final token = await _messaging.getToken();
     if (token != null) {
@@ -84,6 +85,10 @@ class NotificationService {
       final title = message.notification?.title ?? 'New message';
       final body = message.notification?.body ?? '';
       final chatId = message.data['chatId'] as String?;
+      // Suppress notification if user is viewing that chat
+      if (chatId != null && activeChatIdNotifier.value == chatId) {
+        return;
+      }
       showLocalNotification(title: title, body: body, payload: chatId);
     });
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
