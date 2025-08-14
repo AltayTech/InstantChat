@@ -59,9 +59,10 @@ lib/
   - This generates `lib/firebase_options.dart` (already present) and links your app(s)
 
 3) Initialize Firebase in code
-- This app already calls `Firebase.initializeApp()` in `lib/app.dart`. If you used FlutterFire CLI, prefer initializing with generated options:
+- This app initializes Firebase in `lib/main.dart` using the generated options and registers the background FCM handler:
 ```dart
 await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 ```
 
 4) Run
@@ -149,6 +150,49 @@ Example HTTP v1 message (data payload opens a chat):
 }
 ```
 
+## Push notifications end-to-end (what's implemented, step by step)
+
+1) Requirements
+- Firebase project on Blaze plan (needed to deploy Cloud Functions Gen 2).
+- Firestore enabled; Authentication (Email/Password) enabled.
+
+2) iOS console and Xcode
+- In Apple Developer, create an APNs Auth Key (.p8) and note Team ID & Key ID.
+- In Firebase Console → Project Settings → Cloud Messaging, upload the APNs key.
+- In Xcode (Runner target): enable Push Notifications and Background Modes → Remote notifications.
+
+3) App wiring (Flutter)
+- `lib/main.dart`: initialize Firebase with `DefaultFirebaseOptions.currentPlatform` and register `FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler)`.
+- `lib/core/notifications/notification_service.dart`:
+  - Requests notification permission and sets foreground presentation (iOS banners off; we show our own local notifications).
+  - Creates Android channel `chat_messages` and shows local notifications in foreground/background.
+  - Suppresses foreground notifications when viewing the same chat (via `activeChatIdNotifier`).
+  - Handles taps to navigate to `/chat` using `data.chatId`.
+- `lib/core/navigation/app_navigator.dart`: adds `activeChatIdNotifier` and helpers to track the currently open chat.
+- `lib/features/chat/presentation/pages/chat_page.dart`: sets/clears active chat on open/dispose.
+- `lib/features/auth/data/auth_repository.dart`: saves `fcmToken` on register/login and updates it on token refresh.
+- `lib/features/chat/data/chat_repository.dart`: ensures `chats/{chatId}` exists before writing a message and infers `participants` from the `chatId` (`uidA_uidB`).
+
+4) Backend sender (Cloud Function)
+- Trigger: `chats/{chatId}/messages/{messageId}` onCreate.
+- Logic: fetches chat participants from `chats/{chatId}.participants`; if missing, infers from `chatId` split by `_`. Filters out the sender, fetches recipient `users/{uid}.fcmToken`, and calls FCM `sendEachForMulticast` with:
+  - `notification.title/body` and `data.chatId` for navigation.
+  - Android: `channelId: chat_messages`, `priority: high`.
+  - APNs: default sound and alert.
+
+5) Deploy the function
+```bash
+npm --prefix functions install
+npm --prefix functions run build
+firebase deploy --only functions:sendChatMessageNotification
+```
+- Logs (to verify triggers and errors):
+```bash
+firebase functions:log --only sendChatMessageNotification
+```
+
+
+
 ### 5) Verify initialization
 - Run the app and check logs for successful Firebase initialization and FCM token retrieval.
 - Create a test user via the app; verify `users/{uid}` doc appears in Firestore with `fcmToken`.
@@ -163,19 +207,3 @@ Example HTTP v1 message (data payload opens a chat):
 - For production, handle FCM background click navigation via native intent handlers and `onDidReceiveNotificationResponse` in `flutter_local_notifications`.
 - Optional: Implement image/file messages and soft delete via `isDeleted` flag.
 
-# rezatestoctapullapp
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
