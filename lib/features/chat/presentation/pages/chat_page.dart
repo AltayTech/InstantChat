@@ -307,6 +307,12 @@ class _ChatPageState extends State<ChatPage> {
                             ),
                           ),
                           const SizedBox(width: 8),
+                          IconButton(
+                            tooltip: 'Emoji',
+                            onPressed: () => _openEmojiPicker(innerContext),
+                            icon: const Icon(Icons.emoji_emotions_outlined),
+                          ),
+                          const SizedBox(width: 4),
                           ValueListenableBuilder<TextEditingValue>(
                             valueListenable: _controller,
                             builder: (context, value, _) {
@@ -338,6 +344,72 @@ class _ChatPageState extends State<ChatPage> {
     final uid = innerContext.read<AuthBloc>().state.user!.uid;
     innerContext.read<ChatBloc>().add(ChatSendText(text: text, senderId: uid));
     _controller.clear();
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+    );
+  }
+
+  Future<void> _openEmojiPicker(BuildContext innerContext) async {
+    final selected = await showModalBottomSheet<String>(
+      context: innerContext,
+      showDragHandle: true,
+      builder: (ctx) {
+        final emojis = [
+          '😀',
+          '😁',
+          '😂',
+          '🤣',
+          '😊',
+          '😍',
+          '😘',
+          '😎',
+          '🤩',
+          '😇',
+          '👍',
+          '👏',
+          '🙏',
+          '🔥',
+          '🎉',
+          '💯',
+          '✅',
+          '❌',
+          '🤝',
+          '🥳',
+          '😢',
+          '😡',
+          '🤔',
+          '😅',
+          '🙌',
+          '😴',
+          '😱',
+          '🤗',
+          '🤤',
+          '👀',
+        ];
+        return GridView.builder(
+          padding: const EdgeInsets.all(12),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 6,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+          ),
+          itemCount: emojis.length,
+          itemBuilder: (_, i) => InkWell(
+            onTap: () => Navigator.of(ctx).pop(emojis[i]),
+            child: Center(
+              child: Text(emojis[i], style: const TextStyle(fontSize: 28)),
+            ),
+          ),
+        );
+      },
+    );
+    if (selected == null) return;
+    final uid = innerContext.read<AuthBloc>().state.user!.uid;
+    innerContext.read<ChatBloc>().add(
+      ChatSendEmoji(emoji: selected, senderId: uid),
+    );
     _scrollController.animateTo(
       0,
       duration: const Duration(milliseconds: 200),
