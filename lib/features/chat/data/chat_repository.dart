@@ -36,6 +36,18 @@ class ChatRepository {
     );
   }
 
+  Future<void> deleteMessage({
+    required String chatId,
+    required String messageId,
+  }) async {
+    await _firestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .doc(messageId)
+        .delete();
+  }
+
   Future<List<Map>> readCached({required String chatId}) =>
       _hive.readCachedMessages(chatId);
 

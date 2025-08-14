@@ -16,3 +16,8 @@ class ChatSendText extends ChatEvent {
   final String text;
   final String senderId;
 }
+
+class ChatDeleteMessage extends ChatEvent {
+  const ChatDeleteMessage({required this.messageId});
+  final String messageId;
+}

@@ -1,7 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/di/injector.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -9,6 +9,7 @@ import '../../presentation/bloc/chat_bloc.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key, required this.chatId});
+
   final String chatId;
 
   @override
@@ -166,41 +167,90 @@ class _ChatPageState extends State<ChatPage> {
                                               ).size.width *
                                               0.75,
                                         ),
-                                        child: Container(
-                                          margin: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 6,
-                                          ),
-                                          padding: const EdgeInsets.all(12),
-                                          decoration: BoxDecoration(
-                                            color: isMine
-                                                ? Theme.of(
+                                        child: GestureDetector(
+                                          onLongPress: isMine
+                                              ? () async {
+                                                  final confirmed =
+                                                      await showDialog<bool>(
+                                                        context: context,
+                                                        builder: (ctx) => AlertDialog(
+                                                          title: const Text(
+                                                            'Delete message?',
+                                                          ),
+                                                          content: const Text(
+                                                            'This will delete the message for everyone.',
+                                                          ),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () =>
+                                                                  Navigator.of(
+                                                                    ctx,
+                                                                  ).pop(false),
+                                                              child: const Text(
+                                                                'Cancel',
+                                                              ),
+                                                            ),
+                                                            TextButton(
+                                                              onPressed: () =>
+                                                                  Navigator.of(
+                                                                    ctx,
+                                                                  ).pop(true),
+                                                              child: const Text(
+                                                                'Delete',
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                  if (confirmed == true) {
+                                                    context
+                                                        .read<ChatBloc>()
+                                                        .add(
+                                                          ChatDeleteMessage(
+                                                            messageId:
+                                                                msg['id']
+                                                                    as String,
+                                                          ),
+                                                        );
+                                                  }
+                                                }
+                                              : null,
+                                          child: Container(
+                                            margin: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            padding: const EdgeInsets.all(12),
+                                            decoration: BoxDecoration(
+                                              color: isMine
+                                                  ? Theme.of(context)
+                                                        .colorScheme
+                                                        .primaryContainer
+                                                  : Theme.of(context)
+                                                        .colorScheme
+                                                        .surfaceContainerHighest,
+                                              borderRadius: borderRadius,
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  msg['text'] ?? '',
+                                                  style: Theme.of(
                                                     context,
-                                                  ).colorScheme.primaryContainer
-                                                : Theme.of(context)
-                                                      .colorScheme
-                                                      .surfaceContainerHighest,
-                                            borderRadius: borderRadius,
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(
-                                                msg['text'] ?? '',
-                                                style: Theme.of(
-                                                  context,
-                                                ).textTheme.bodyLarge,
-                                              ),
-                                              const SizedBox(height: 6),
-                                              Text(
-                                                time,
-                                                style: Theme.of(
-                                                  context,
-                                                ).textTheme.labelSmall,
-                                              ),
-                                            ],
+                                                  ).textTheme.bodyLarge,
+                                                ),
+                                                const SizedBox(height: 6),
+                                                Text(
+                                                  time,
+                                                  style: Theme.of(
+                                                    context,
+                                                  ).textTheme.labelSmall,
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),

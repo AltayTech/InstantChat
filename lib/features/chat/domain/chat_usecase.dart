@@ -29,6 +29,11 @@ class ChatUseCase {
     );
   }
 
+  Future<void> deleteMessage({
+    required String chatId,
+    required String messageId,
+  }) => _repository.deleteMessage(chatId: chatId, messageId: messageId);
+
   Future<List<Map>> readCached(String chatId) =>
       _repository.readCached(chatId: chatId);
   Future<void> cache(String chatId, List<Map> messages) =>
