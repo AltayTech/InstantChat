@@ -18,10 +18,26 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
+  bool _showScrollToBottom = false;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(() {
+      final shouldShow = _scrollController.position.pixels > 200;
+      if (shouldShow != _showScrollToBottom) {
+        setState(() => _showScrollToBottom = shouldShow);
+      }
+    });
+  }
+
+  String _formatDateHeader(DateTime dateOnly) {
+    final now = DateTime.now();
+    final todayOnly = DateTime(now.year, now.month, now.day);
+    final yesterdayOnly = todayOnly.subtract(const Duration(days: 1));
+    if (dateOnly == todayOnly) return 'Today';
+    if (dateOnly == yesterdayOnly) return 'Yesterday';
+    return DateFormat('d MMM yyyy').format(dateOnly);
   }
 
   @override
@@ -46,64 +62,171 @@ class _ChatPageState extends State<ChatPage> {
                         if (state.messages.isEmpty) {
                           return const Center(child: Text('No messages yet'));
                         }
-                        return ListView.builder(
-                          reverse: true,
-                          controller: _scrollController,
-                          itemCount: state.messages.length,
-                          itemBuilder: (context, index) {
-                            final msg = state.messages[index];
-                            final isMine =
-                                msg['senderId'] ==
-                                context.read<AuthBloc>().state.user?.uid;
-                            final ts = msg['createdAt'];
-                            String time = '';
-                            if (ts is DateTime) {
-                              time = DateFormat('HH:mm').format(ts);
-                            } else if (ts is Timestamp) {
-                              time = DateFormat('HH:mm').format(ts.toDate());
-                            }
-                            return Align(
-                              alignment: isMine
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: isMine
-                                      ? Theme.of(
-                                          context,
-                                        ).colorScheme.primaryContainer
-                                      : Theme.of(
-                                          context,
-                                        ).colorScheme.surfaceContainerHighest,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                        return Stack(
+                          children: [
+                            ListView.builder(
+                              reverse: true,
+                              controller: _scrollController,
+                              itemCount: state.messages.length,
+                              itemBuilder: (context, index) {
+                                final msg = state.messages[index];
+                                final isMine =
+                                    msg['senderId'] ==
+                                    context.read<AuthBloc>().state.user?.uid;
+                                final ts = msg['createdAt'];
+                                DateTime createdAt;
+                                if (ts is DateTime) {
+                                  createdAt = ts;
+                                } else if (ts is Timestamp) {
+                                  createdAt = ts.toDate();
+                                } else {
+                                  createdAt = DateTime.now();
+                                }
+                                final time = DateFormat(
+                                  'HH:mm',
+                                ).format(createdAt);
+
+                                String? dateHeaderLabel;
+                                DateTime? currentDateOnly = DateTime(
+                                  createdAt.year,
+                                  createdAt.month,
+                                  createdAt.day,
+                                );
+                                if (index == state.messages.length - 1) {
+                                  dateHeaderLabel = _formatDateHeader(
+                                    currentDateOnly,
+                                  );
+                                } else {
+                                  final next =
+                                      state.messages[index + 1]['createdAt'];
+                                  DateTime nextDate;
+                                  if (next is DateTime) {
+                                    nextDate = next;
+                                  } else if (next is Timestamp) {
+                                    nextDate = next.toDate();
+                                  } else {
+                                    nextDate = createdAt;
+                                  }
+                                  final nextOnly = DateTime(
+                                    nextDate.year,
+                                    nextDate.month,
+                                    nextDate.day,
+                                  );
+                                  if (nextOnly != currentDateOnly) {
+                                    dateHeaderLabel = _formatDateHeader(
+                                      currentDateOnly,
+                                    );
+                                  }
+                                }
+                                final borderRadius = BorderRadius.only(
+                                  topLeft: const Radius.circular(12),
+                                  topRight: const Radius.circular(12),
+                                  bottomLeft: Radius.circular(isMine ? 12 : 2),
+                                  bottomRight: Radius.circular(isMine ? 2 : 12),
+                                );
+                                return Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      msg['text'] ?? '',
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge,
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      time,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.labelSmall,
+                                    if (dateHeaderLabel != null)
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                        ),
+                                        child: Center(
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.surfaceVariant,
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Text(
+                                              dateHeaderLabel,
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.labelMedium,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    Align(
+                                      alignment: isMine
+                                          ? Alignment.centerRight
+                                          : Alignment.centerLeft,
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxWidth:
+                                              MediaQuery.of(
+                                                context,
+                                              ).size.width *
+                                              0.75,
+                                        ),
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: isMine
+                                                ? Theme.of(
+                                                    context,
+                                                  ).colorScheme.primaryContainer
+                                                : Theme.of(context)
+                                                      .colorScheme
+                                                      .surfaceContainerHighest,
+                                            borderRadius: borderRadius,
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                msg['text'] ?? '',
+                                                style: Theme.of(
+                                                  context,
+                                                ).textTheme.bodyLarge,
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Text(
+                                                time,
+                                                style: Theme.of(
+                                                  context,
+                                                ).textTheme.labelSmall,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ],
+                                );
+                              },
+                            ),
+                            if (_showScrollToBottom)
+                              Positioned(
+                                right: 12,
+                                bottom: 12,
+                                child: FloatingActionButton.small(
+                                  onPressed: () {
+                                    _scrollController.animateTo(
+                                      0,
+                                      duration: const Duration(
+                                        milliseconds: 250,
+                                      ),
+                                      curve: Curves.easeOut,
+                                    );
+                                  },
+                                  child: const Icon(Icons.keyboard_arrow_down),
                                 ),
                               ),
-                            );
-                          },
+                          ],
                         );
                       },
                     ),
@@ -116,26 +239,35 @@ class _ChatPageState extends State<ChatPage> {
                           Expanded(
                             child: TextField(
                               controller: _controller,
-                              decoration: const InputDecoration(
+                              textCapitalization: TextCapitalization.sentences,
+                              minLines: 1,
+                              maxLines: 5,
+                              decoration: InputDecoration(
                                 hintText: 'Message',
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
                               ),
+                              onSubmitted: (_) => _handleSend(innerContext),
                             ),
                           ),
-                          IconButton(
-                            onPressed: () {
-                              final text = _controller.text.trim();
-                              if (text.isEmpty) return;
-                              final uid = innerContext
-                                  .read<AuthBloc>()
-                                  .state
-                                  .user!
-                                  .uid;
-                              innerContext.read<ChatBloc>().add(
-                                ChatSendText(text: text, senderId: uid),
+                          const SizedBox(width: 8),
+                          ValueListenableBuilder<TextEditingValue>(
+                            valueListenable: _controller,
+                            builder: (context, value, _) {
+                              final canSend = value.text.trim().isNotEmpty;
+                              return IconButton.filled(
+                                onPressed: canSend
+                                    ? () => _handleSend(innerContext)
+                                    : null,
+                                icon: const Icon(Icons.send),
                               );
-                              _controller.clear();
                             },
-                            icon: const Icon(Icons.send),
                           ),
                         ],
                       ),
@@ -147,6 +279,19 @@ class _ChatPageState extends State<ChatPage> {
           );
         },
       ),
+    );
+  }
+
+  void _handleSend(BuildContext innerContext) {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    final uid = innerContext.read<AuthBloc>().state.user!.uid;
+    innerContext.read<ChatBloc>().add(ChatSendText(text: text, senderId: uid));
+    _controller.clear();
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
     );
   }
 }
