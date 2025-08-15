@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../data/chat_repository.dart';
 
 class ChatUseCase {
@@ -28,6 +30,47 @@ class ChatUseCase {
       message: {'senderId': senderId, 'text': text, 'type': 'text'},
     );
   }
+
+  Future<void> sendFile({
+    required String chatId,
+    required String senderId,
+    required String url,
+    required String filename,
+    required int bytes,
+    required String mimeType,
+    required String displayType,
+  }) async {
+    await _repository.sendMessage(
+      chatId: chatId,
+      message: {
+        'senderId': senderId,
+        'type': displayType, // 'image' | 'file'
+        'fileUrl': url,
+        'fileName': filename,
+        'fileSize': bytes,
+        'mimeType': mimeType,
+      },
+    );
+  }
+
+  Future<String> uploadFile({
+    required String chatId,
+    required String senderId,
+    required File file,
+    required String filename,
+    required String mimeType,
+    void Function(double progress)? onProgress,
+  }) {
+    return _repository.uploadFile(
+      chatId: chatId,
+      senderId: senderId,
+      file: file,
+      filename: filename,
+      contentType: mimeType,
+      onProgress: onProgress,
+    );
+  }
+
   // Sends an emoji message the same way as text, but with type 'emoji'
   // This allows to send emojis without needing a separate method
   // I add this becasue I think it is not necessary to have a separate method for sending emojis

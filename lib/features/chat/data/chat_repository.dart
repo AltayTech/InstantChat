@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../../core/local/hive_manager.dart';
 
@@ -6,11 +9,14 @@ class ChatRepository {
   ChatRepository({
     required FirebaseFirestore firestore,
     required HiveManager hiveManager,
+    required FirebaseStorage storage,
   }) : _firestore = firestore,
-       _hive = hiveManager;
+       _hive = hiveManager,
+       _storage = storage;
 
   final FirebaseFirestore _firestore;
   final HiveManager _hive;
+  final FirebaseStorage _storage;
 
   Stream<List<Map<String, dynamic>>> messagesStream({required String chatId}) {
     return _firestore
@@ -47,6 +53,36 @@ class ChatRepository {
         .collection('messages')
         .doc(messageId)
         .delete();
+  }
+
+  Future<String> uploadFile({
+    required String chatId,
+    required String senderId,
+    required File file,
+    required String filename,
+    required String contentType,
+    void Function(double progress)? onProgress,
+  }) async {
+    final ref = _storage
+        .ref()
+        .child('chats')
+        .child(chatId)
+        .child(
+          DateTime.now().millisecondsSinceEpoch.toString() + '_' + filename,
+        );
+    final uploadTask = ref.putFile(
+      file,
+      SettableMetadata(contentType: contentType),
+    );
+    if (onProgress != null) {
+      uploadTask.snapshotEvents.listen((s) {
+        if (s.totalBytes > 0) {
+          onProgress((s.bytesTransferred / s.totalBytes) * 100);
+        }
+      });
+    }
+    await uploadTask.whenComplete(() {});
+    return ref.getDownloadURL();
   }
 
   Future<List<Map>> readCached({required String chatId}) =>
