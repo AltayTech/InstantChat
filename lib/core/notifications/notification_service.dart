@@ -43,62 +43,89 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
-    const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher',
-    );
-    const initSettings = InitializationSettings(android: androidSettings);
-    await _local.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: (response) {
-        openChatFromPayload(response.payload);
-      },
-    );
+    try {
+      const androidSettings = AndroidInitializationSettings(
+        '@mipmap/ic_launcher',
+      );
+      const initSettings = InitializationSettings(android: androidSettings);
+      await _local.initialize(
+        initSettings,
+        onDidReceiveNotificationResponse: (response) {
+          openChatFromPayload(response.payload);
+        },
+      );
 
-    await _messaging.requestPermission();
-    final androidImplementation = _local
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
-    await androidImplementation?.requestNotificationsPermission();
-    await androidImplementation?.createNotificationChannel(
-      const AndroidNotificationChannel(
-        'chat_messages',
-        'Chat Messages',
-        importance: Importance.high,
-      ),
-    );
-    await _messaging.setAutoInitEnabled(true);
-    // Disable OS banners for iOS foreground; we control presentation via local notifications
-    await _messaging.setForegroundNotificationPresentationOptions(
-      alert: false,
-      badge: true,
-      sound: false,
-    );
-    final token = await _messaging.getToken();
-    if (token != null) {
-      debugPrint('FCM token: ' + token);
-    }
-    _messaging.onTokenRefresh.listen((newToken) {
-      debugPrint('FCM token refreshed: ' + newToken);
-    });
-    FirebaseMessaging.onMessage.listen((message) {
-      final title = message.notification?.title ?? 'New message';
-      final body = message.notification?.body ?? '';
-      final chatId = message.data['chatId'] as String?;
-      // Suppress notification if user is viewing that chat
-      if (chatId != null && activeChatIdNotifier.value == chatId) {
-        return;
-      }
-      showLocalNotification(title: title, body: body, payload: chatId);
-    });
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      final chatId = message.data['chatId'] as String?;
-      openChatFromPayload(chatId);
-    });
-    final initial = await _messaging.getInitialMessage();
-    if (initial != null) {
-      final chatId = initial.data['chatId'] as String?;
-      openChatFromPayload(chatId);
+      // Permissions can hang on some emulator images; guard with timeouts
+      try {
+        await _messaging.requestPermission().timeout(
+          const Duration(seconds: 3),
+        );
+      } catch (_) {}
+
+      final androidImplementation = _local
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      try {
+        await androidImplementation?.requestNotificationsPermission();
+        await androidImplementation?.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'chat_messages',
+            'Chat Messages',
+            importance: Importance.high,
+          ),
+        );
+      } catch (_) {}
+
+      await _messaging.setAutoInitEnabled(true);
+      // Disable OS banners for iOS foreground; we control presentation via local notifications
+      try {
+        await _messaging.setForegroundNotificationPresentationOptions(
+          alert: false,
+          badge: true,
+          sound: false,
+        );
+      } catch (_) {}
+
+      try {
+        final token = await _messaging.getToken().timeout(
+          const Duration(seconds: 3),
+          onTimeout: () => null,
+        );
+        if (token != null) {
+          debugPrint('FCM token: ' + token);
+        }
+      } catch (_) {}
+      _messaging.onTokenRefresh.listen((newToken) {
+        debugPrint('FCM token refreshed: ' + newToken);
+      });
+      FirebaseMessaging.onMessage.listen((message) {
+        final title = message.notification?.title ?? 'New message';
+        final body = message.notification?.body ?? '';
+        final chatId = message.data['chatId'] as String?;
+        // Suppress notification if user is viewing that chat
+        if (chatId != null && activeChatIdNotifier.value == chatId) {
+          return;
+        }
+        showLocalNotification(title: title, body: body, payload: chatId);
+      });
+      FirebaseMessaging.onMessageOpenedApp.listen((message) {
+        final chatId = message.data['chatId'] as String?;
+        openChatFromPayload(chatId);
+      });
+      try {
+        final initial = await _messaging.getInitialMessage().timeout(
+          const Duration(seconds: 3),
+          onTimeout: () => null,
+        );
+        if (initial != null) {
+          final chatId = initial.data['chatId'] as String?;
+          openChatFromPayload(chatId);
+        }
+      } catch (_) {}
+    } catch (e) {
+      // Swallow any unexpected init failures so the app can continue startup
+      debugPrint('NotificationService init error: ' + e.toString());
     }
   }
 
