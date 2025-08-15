@@ -28,7 +28,9 @@ class ChatUseCase {
       message: {'senderId': senderId, 'text': text, 'type': 'text'},
     );
   }
-
+  // Sends an emoji message the same way as text, but with type 'emoji'
+  // This allows to send emojis without needing a separate method
+  // I add this becasue I think it is not necessary to have a separate method for sending emojis
   Future<void> sendEmoji({
     required String chatId,
     required String senderId,
@@ -40,6 +42,8 @@ class ChatUseCase {
     );
   }
 
+  // hold on the message and then this function will delete it
+  // it will be deleted from the firestore and the cache
   Future<void> deleteMessage({
     required String chatId,
     required String messageId,

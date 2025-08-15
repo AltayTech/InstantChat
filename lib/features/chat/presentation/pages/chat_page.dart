@@ -87,6 +87,7 @@ class _ChatPageState extends State<ChatPage> {
                             (data?['name'] as String?) ??
                             (data?['email'] as String?) ??
                             'Chat';
+                        //  I add profile avatar and it is not used in this project, but can be used for future features
                         final photoUrl = data?['photoUrl'] as String?;
                         final isOnline = data?['isOnline'] == true;
                         return Row(
