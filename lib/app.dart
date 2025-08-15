@@ -29,10 +29,17 @@ class _AppRootState extends State<AppRoot> {
   }
 
   Future<void> _init() async {
-    WidgetsFlutterBinding.ensureInitialized();
     await setupServiceLocator();
     await serviceLocator<HiveManager>().init();
-    await serviceLocator<NotificationService>().init();
+    try {
+      // Do not block app startup on notifications; some devices/emulators
+      // can hang while fetching the FCM token or waiting for permissions.
+      await serviceLocator<NotificationService>().init().timeout(
+        const Duration(seconds: 5),
+      );
+    } catch (_) {
+      // Ignore notification init failures at startup; app can continue.
+    }
     setState(() => _isReady = true);
   }
 
