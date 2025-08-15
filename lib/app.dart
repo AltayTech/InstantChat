@@ -49,8 +49,12 @@ class _AppRootState extends State<AppRoot> {
         title: 'Real-Time Chat',
         navigatorKey: appNavigatorKey,
         themeMode: ThemeMode.system,
-        theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
-        darkTheme: ThemeData.dark(useMaterial3: true),
+        theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+        darkTheme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: Colors.indigo,
+          brightness: Brightness.dark,
+        ),
         initialRoute: '/',
         onGenerateRoute: (settings) {
           switch (settings.name) {

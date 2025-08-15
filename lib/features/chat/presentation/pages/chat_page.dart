@@ -21,11 +21,22 @@ class _ChatPageState extends State<ChatPage> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   bool _showScrollToBottom = false;
+  String? _otherUserUid;
 
   @override
   void initState() {
     super.initState();
     setActiveChatId(widget.chatId);
+    final parts = widget.chatId.split('_');
+    final currentUid = context.read<AuthBloc>().state.user?.uid;
+    if (parts.length == 2 && currentUid != null) {
+      _otherUserUid = parts.first == currentUid ? parts.last : parts.first;
+    } else if (parts.isNotEmpty) {
+      _otherUserUid = parts.firstWhere(
+        (p) => p != currentUid,
+        orElse: () => parts.first,
+      );
+    }
     _scrollController.addListener(() {
       final shouldShow = _scrollController.position.pixels > 200;
       if (shouldShow != _showScrollToBottom) {
@@ -58,7 +69,72 @@ class _ChatPageState extends State<ChatPage> {
       child: Builder(
         builder: (innerContext) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Chat')),
+            appBar: AppBar(
+              titleSpacing: 0,
+              title: _otherUserUid == null
+                  ? const Text('Chat')
+                  : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .where('uid', isEqualTo: _otherUserUid)
+                          .limit(1)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        final data = snapshot.data?.docs.isNotEmpty == true
+                            ? snapshot.data!.docs.first.data()
+                            : null;
+                        final displayName =
+                            (data?['name'] as String?) ??
+                            (data?['email'] as String?) ??
+                            'Chat';
+                        final photoUrl = data?['photoUrl'] as String?;
+                        final isOnline = data?['isOnline'] == true;
+                        return Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 18,
+                              backgroundImage: photoUrl != null
+                                  ? NetworkImage(photoUrl)
+                                  : null,
+                              child: photoUrl == null
+                                  ? const Icon(Icons.person)
+                                  : null,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    displayName,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium,
+                                  ),
+                                  Text(
+                                    isOnline ? 'Online' : 'Offline',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: isOnline
+                                              ? Colors.green
+                                              : Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurfaceVariant,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+            ),
             body: SafeArea(
               child: Column(
                 children: [
@@ -235,10 +311,10 @@ class _ChatPageState extends State<ChatPage> {
                                               color: isMine
                                                   ? Theme.of(context)
                                                         .colorScheme
-                                                        .primaryContainer
+                                                        .tertiaryContainer
                                                   : Theme.of(context)
                                                         .colorScheme
-                                                        .surfaceContainerHighest,
+                                                        .surfaceVariant,
                                               borderRadius: borderRadius,
                                             ),
                                             child: Column(
@@ -248,16 +324,40 @@ class _ChatPageState extends State<ChatPage> {
                                               children: [
                                                 Text(
                                                   msg['text'] ?? '',
-                                                  style: Theme.of(
-                                                    context,
-                                                  ).textTheme.bodyLarge,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge
+                                                      ?.copyWith(
+                                                        color: isMine
+                                                            ? Theme.of(context)
+                                                                  .colorScheme
+                                                                  .onTertiaryContainer
+                                                            : Theme.of(context)
+                                                                  .colorScheme
+                                                                  .onSurfaceVariant,
+                                                      ),
                                                 ),
                                                 const SizedBox(height: 6),
                                                 Text(
                                                   time,
-                                                  style: Theme.of(
-                                                    context,
-                                                  ).textTheme.labelSmall,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelSmall
+                                                      ?.copyWith(
+                                                        color: isMine
+                                                            ? Theme.of(context)
+                                                                  .colorScheme
+                                                                  .onTertiaryContainer
+                                                                  .withOpacity(
+                                                                    0.8,
+                                                                  )
+                                                            : Theme.of(context)
+                                                                  .colorScheme
+                                                                  .onSurfaceVariant
+                                                                  .withOpacity(
+                                                                    0.8,
+                                                                  ),
+                                                      ),
                                                 ),
                                               ],
                                             ),
@@ -309,6 +409,10 @@ class _ChatPageState extends State<ChatPage> {
                                   horizontal: 12,
                                   vertical: 10,
                                 ),
+                                filled: true,
+                                fillColor: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(20),
                                 ),
