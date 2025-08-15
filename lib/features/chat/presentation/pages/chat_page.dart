@@ -91,14 +91,17 @@ class _ChatPageState extends State<ChatPage> {
                         final isOnline = data?['isOnline'] == true;
                         return Row(
                           children: [
-                            CircleAvatar(
-                              radius: 18,
-                              backgroundImage: photoUrl != null
-                                  ? NetworkImage(photoUrl)
-                                  : null,
-                              child: photoUrl == null
-                                  ? const Icon(Icons.person)
-                                  : null,
+                            Hero(
+                              tag: 'avatar_' + (_otherUserUid ?? ''),
+                              child: CircleAvatar(
+                                radius: 18,
+                                backgroundImage: photoUrl != null
+                                    ? NetworkImage(photoUrl)
+                                    : null,
+                                child: photoUrl == null
+                                    ? const Icon(Icons.person)
+                                    : null,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(

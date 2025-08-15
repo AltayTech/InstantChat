@@ -64,11 +64,17 @@ class _UsersPageState extends State<UsersPage> {
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                   child: TextField(
                     controller: _searchController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Search users',
-                      prefixIcon: Icon(Icons.search),
+                      prefixIcon: const Icon(Icons.search),
                       isDense: true,
-                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
                   ),
                 ),
@@ -106,29 +112,44 @@ class _UsersPageState extends State<UsersPage> {
                         },
                         child: ListView.separated(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                           itemCount: filteredUsers.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
                           itemBuilder: (context, index) {
                             final user = filteredUsers[index];
                             final bool isOnline = user['isOnline'] == true;
                             final String displayName =
                                 user['name'] ?? user['email'] ?? 'User';
-                            return ListTile(
-                              leading: Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  CircleAvatar(
-                                    backgroundImage: user['photoUrl'] != null
-                                        ? CachedNetworkImageProvider(
-                                            user['photoUrl'],
-                                          )
-                                        : null,
-                                    child: user['photoUrl'] == null
-                                        ? const Icon(Icons.person)
-                                        : null,
-                                  ),
-                                  if (isOnline)
+                            final String uid = user['uid'] as String;
+                            final String? photoUrl =
+                                user['photoUrl'] as String?;
+                            return Card(
+                              elevation: 0,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.all(12),
+                                leading: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    Hero(
+                                      tag: 'avatar_' + uid,
+                                      child: CircleAvatar(
+                                        backgroundImage: photoUrl != null
+                                            ? CachedNetworkImageProvider(
+                                                photoUrl,
+                                              )
+                                            : null,
+                                        child: photoUrl == null
+                                            ? const Icon(Icons.person)
+                                            : null,
+                                      ),
+                                    ),
                                     Positioned(
                                       right: -2,
                                       bottom: -2,
@@ -136,7 +157,11 @@ class _UsersPageState extends State<UsersPage> {
                                         width: 12,
                                         height: 12,
                                         decoration: BoxDecoration(
-                                          color: Colors.green,
+                                          color: isOnline
+                                              ? Colors.green
+                                              : Theme.of(
+                                                  context,
+                                                ).colorScheme.outlineVariant,
                                           shape: BoxShape.circle,
                                           border: Border.all(
                                             color: Theme.of(
@@ -147,33 +172,41 @@ class _UsersPageState extends State<UsersPage> {
                                         ),
                                       ),
                                     ),
-                                ],
-                              ),
-                              title: Text(displayName),
-                              subtitle: Text(
-                                isOnline ? 'Online' : 'Offline',
-                                style: TextStyle(
-                                  color: isOnline
-                                      ? Colors.green
-                                      : Theme.of(
-                                          context,
-                                        ).textTheme.bodySmall?.color,
+                                  ],
                                 ),
+                                title: Text(
+                                  displayName,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                                subtitle: Text(
+                                  isOnline ? 'Online' : 'Offline',
+                                  style: Theme.of(context).textTheme.labelSmall
+                                      ?.copyWith(
+                                        color: isOnline
+                                            ? Colors.green
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                                trailing: const Icon(Icons.chevron_right),
+                                onTap: () {
+                                  final String currentUserId = context
+                                      .read<AuthBloc>()
+                                      .state
+                                      .user!
+                                      .uid;
+                                  final String otherId = uid;
+                                  final chatId = [currentUserId, otherId]
+                                    ..sort();
+                                  Navigator.of(context).pushNamed(
+                                    '/chat',
+                                    arguments: chatId.join('_'),
+                                  );
+                                },
                               ),
-                              trailing: const Icon(Icons.chevron_right),
-                              onTap: () {
-                                final String currentUserId = context
-                                    .read<AuthBloc>()
-                                    .state
-                                    .user!
-                                    .uid;
-                                final String otherId = user['uid'] as String;
-                                final chatId = [currentUserId, otherId]..sort();
-                                Navigator.of(context).pushNamed(
-                                  '/chat',
-                                  arguments: chatId.join('_'),
-                                );
-                              },
                             );
                           },
                         ),
