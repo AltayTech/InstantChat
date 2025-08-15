@@ -9,7 +9,18 @@ class AuthRepository {
     required FirebaseMessaging messaging,
   }) : _auth = auth,
        _firestore = firestore,
-       _messaging = messaging;
+       _messaging = messaging {
+    _messaging.onTokenRefresh.listen((token) async {
+      final uid = _auth.currentUser?.uid;
+      if (uid == null) return;
+      try {
+        await _firestore.collection('users').doc(uid).set({
+          'fcmToken': token,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      } catch (_) {}
+    });
+  }
 
   final fb_auth.FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
@@ -49,9 +60,11 @@ class AuthRepository {
       password: password,
     );
     final uid = cred.user!.uid;
+    final token = await _messaging.getToken();
     await _firestore.collection('users').doc(uid).set({
       'uid': uid,
       'email': cred.user!.email ?? email,
+      'fcmToken': token,
       'isOnline': true,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
@@ -60,13 +73,18 @@ class AuthRepository {
 
   Future<void> logout() async {
     final uid = _auth.currentUser?.uid;
-    if (uid != null) {
-      await _firestore.collection('users').doc(uid).update({
-        'isOnline': false,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+    try {
+      if (uid != null) {
+        await _firestore.collection('users').doc(uid).set({
+          'isOnline': false,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+    } catch (_) {
+      // Ignore Firestore update failures on logout
+    } finally {
+      await _auth.signOut();
     }
-    await _auth.signOut();
   }
 
   fb_auth.User? get currentUser => _auth.currentUser;

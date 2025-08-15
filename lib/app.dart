@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -31,7 +30,6 @@ class _AppRootState extends State<AppRoot> {
 
   Future<void> _init() async {
     WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp();
     await setupServiceLocator();
     await serviceLocator<HiveManager>().init();
     await serviceLocator<NotificationService>().init();
@@ -51,8 +49,12 @@ class _AppRootState extends State<AppRoot> {
         title: 'Real-Time Chat',
         navigatorKey: appNavigatorKey,
         themeMode: ThemeMode.system,
-        theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
-        darkTheme: ThemeData.dark(useMaterial3: true),
+        theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+        darkTheme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: Colors.indigo,
+          brightness: Brightness.dark,
+        ),
         initialRoute: '/',
         onGenerateRoute: (settings) {
           switch (settings.name) {

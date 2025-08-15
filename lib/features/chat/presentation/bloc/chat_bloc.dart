@@ -14,6 +14,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       super(const ChatState.initial()) {
     on<ChatOpened>(_onOpened);
     on<ChatSendText>(_onSendText);
+    on<ChatSendEmoji>(_onSendEmoji);
+    on<ChatDeleteMessage>(_onDeleteMessage);
   }
 
   final ChatUseCase _useCase;
@@ -46,6 +48,26 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       senderId: event.senderId,
       text: event.text,
     );
+  }
+
+  Future<void> _onSendEmoji(
+    ChatSendEmoji event,
+    Emitter<ChatState> emit,
+  ) async {
+    await _useCase.sendEmoji(
+      chatId: state.chatId!,
+      senderId: event.senderId,
+      emoji: event.emoji,
+    );
+  }
+
+  Future<void> _onDeleteMessage(
+    ChatDeleteMessage event,
+    Emitter<ChatState> emit,
+  ) async {
+    final chatId = state.chatId;
+    if (chatId == null) return;
+    await _useCase.deleteMessage(chatId: chatId, messageId: event.messageId);
   }
 
   @override

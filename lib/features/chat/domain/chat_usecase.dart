@@ -29,6 +29,22 @@ class ChatUseCase {
     );
   }
 
+  Future<void> sendEmoji({
+    required String chatId,
+    required String senderId,
+    required String emoji,
+  }) async {
+    await _repository.sendMessage(
+      chatId: chatId,
+      message: {'senderId': senderId, 'text': emoji, 'type': 'emoji'},
+    );
+  }
+
+  Future<void> deleteMessage({
+    required String chatId,
+    required String messageId,
+  }) => _repository.deleteMessage(chatId: chatId, messageId: messageId);
+
   Future<List<Map>> readCached(String chatId) =>
       _repository.readCached(chatId: chatId);
   Future<void> cache(String chatId, List<Map> messages) =>

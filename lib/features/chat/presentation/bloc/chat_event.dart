@@ -16,3 +16,14 @@ class ChatSendText extends ChatEvent {
   final String text;
   final String senderId;
 }
+
+class ChatSendEmoji extends ChatEvent {
+  const ChatSendEmoji({required this.emoji, required this.senderId});
+  final String emoji;
+  final String senderId;
+}
+
+class ChatDeleteMessage extends ChatEvent {
+  const ChatDeleteMessage({required this.messageId});
+  final String messageId;
+}

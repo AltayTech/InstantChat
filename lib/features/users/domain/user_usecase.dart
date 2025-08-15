@@ -12,12 +12,13 @@ class UserUseCase {
   final AuthRepository _authRepository;
 
   Stream<List<Map<String, dynamic>>> usersStream() {
-    final current = _authRepository.currentUser?.uid;
-    // Fetch all users and filter on the client to avoid Firestore '!=' quirks/indexes
+    final currentUserId = _authRepository.currentUser?.uid;
+    // Fetch all users and filter out the currently logged-in user on the client
+    // to avoid Firestore isNotEqualTo/ordering quirks and index requirements.
     return _userRepository.usersStream().map((users) {
-      if (current == null) return users;
+      if (currentUserId == null) return users;
       return users
-          // .where((u) => (u['uid'] ?? u['id']) != current)
+          .where((u) => (u['uid'] ?? u['id']) != currentUserId)
           .toList(growable: false);
     });
   }
