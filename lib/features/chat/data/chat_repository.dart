@@ -95,9 +95,21 @@ class ChatRepository {
     final docRef = _firestore.collection('chats').doc(chatId);
     final doc = await docRef.get();
     if (doc.exists) {
-      // Touch updatedAt to keep recency; avoid overriding participants if present
+      // Touch updatedAt to keep recency and ensure participants are present
+      final data = doc.data();
+      List<dynamic>? existingParticipants = data != null
+          ? (data['participants'] as List<dynamic>?)
+          : null;
+      List<String> participantsToMerge = <String>[];
+      if (existingParticipants == null || existingParticipants.isEmpty) {
+        final parts = chatId.split('_');
+        if (parts.length == 2) {
+          participantsToMerge = parts.cast<String>();
+        }
+      }
       await docRef.set({
         'updatedAt': FieldValue.serverTimestamp(),
+        if (participantsToMerge.isNotEmpty) 'participants': participantsToMerge,
       }, SetOptions(merge: true));
       return;
     }
