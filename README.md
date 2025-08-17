@@ -65,24 +65,20 @@ Follow these steps in the Firebase Console for the services this app uses: Authe
 ### 3) Create Firestore database
 - Go to Build > Firestore Database and create a database.
 - Choose your preferred location. Start in test mode for local development, then tighten rules for production.
-- Collections this app expects:
+- Note:Collections this app expects:
   - `users/{uid}` docs with fields: `uid`, `email`, `name`, `photoUrl`, `isOnline`, `fcmToken`, `createdAt`, `updatedAt`.
   - `chats/{chatId}/messages/{messageId}` docs with fields: your message payload plus `createdAt`, `isDeleted`.
 
-
-Notes on indexes:
-- Current queries do not require composite indexes (simple `where` and `orderBy createdAt`). If you later add compound queries, create indexes when Firestore prompts you.
-
+  
 ### 4) Enable Cloud Storage
 - Go to Firebase Console > Build > Storage and create a Storage bucket (choose your preferred location).
 - Start in test mode for local development, then tighten rules for production.
-- Suggested minimal Storage rules for user uploads (adjust for production):
 
 
 ### 5) Configure Cloud Messaging (FCM)
 - FCM is enabled by default for Firebase projects. No extra enable/disable switch is needed.
 - Get your device tokens by running the app; the app saves the token to `users/{uid}.fcmToken` on registration.
-- You can send test messages from Firebase Console > Engage > Messaging.
+- For test after setup finished: You can send test messages from Firebase Console > Engage > Messaging.
 
 iOS-specific (required if you ship to iOS):
 - In Apple Developer, create an APNs Auth Key (.p8) and note your Team ID and Key ID.
@@ -93,7 +89,7 @@ Android-specific:
 - Ensure `android/app/google-services.json` matches your Firebase Android app.
 - `POST_NOTIFICATIONS` runtime permission is requested in-app for Android 13+ (already handled by the app).
 
-Optional (server sending):
+Optional (different server sending):
 - If you plan to send notifications from your backend, create a service account and use the FCM HTTP v1 API with your project's credentials.
 
 Example HTTP v1 message (data payload opens a chat):
@@ -147,6 +143,8 @@ firebase functions:log --only sendChatMessageNotification
 - `lib/features/chat/presentation/pages/chat_page.dart`: sets/clears active chat on open/dispose.
 - `lib/features/auth/data/auth_repository.dart`: saves `fcmToken` on register/login and updates it on token refresh.
 - `lib/features/chat/data/chat_repository.dart`: ensures `chats/{chatId}` exists before writing a message and infers `participants` from the `chatId` (`uidA_uidB`).
+
+
 
 5) Backend sender (Cloud Function)( clarification step)
 - Trigger: `chats/{chatId}/messages/{messageId}` onCreate.
