@@ -8,7 +8,6 @@ import 'core/navigation/app_navigator.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/pages/register_page.dart';
-import 'features/auth/presentation/pages/onboarding_page.dart';
 import 'features/chat/presentation/pages/chat_page.dart';
 import 'features/users/presentation/pages/users_page.dart';
 
@@ -67,8 +66,6 @@ class _AppRootState extends State<AppRoot> {
           switch (settings.name) {
             case '/':
               return MaterialPageRoute(builder: (_) => _AuthGate());
-            case '/onboarding':
-              return MaterialPageRoute(builder: (_) => const OnboardingPage());
             case '/login':
               return MaterialPageRoute(builder: (_) => const LoginPage());
             case '/register':

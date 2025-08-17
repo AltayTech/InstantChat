@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import '../navigation/app_navigator.dart';
 
 @pragma('vm:entry-point')
@@ -8,30 +9,30 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Show a local notification for background data-only messages (Android)
   // iOS displays notifications automatically when payload contains the
   // notification block, and background handlers are not supported on iOS.
-  final FlutterLocalNotificationsPlugin localPlugin =
-      FlutterLocalNotificationsPlugin();
-  const AndroidInitializationSettings androidInit =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-  const InitializationSettings initSettings = InitializationSettings(
-    android: androidInit,
-  );
-  await localPlugin.initialize(initSettings);
-
-  const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-    'chat_messages',
-    'Chat Messages',
-    importance: Importance.high,
-    priority: Priority.high,
-  );
-  const NotificationDetails notifDetails = NotificationDetails(
-    android: androidDetails,
-  );
-
-  final String title = message.notification?.title ?? 'New message';
-  final String body = message.notification?.body ?? '';
-  final String? chatId = message.data['chatId'] as String?;
-
-  await localPlugin.show(0, title, body, notifDetails, payload: chatId);
+  // final FlutterLocalNotificationsPlugin localPlugin =
+  //     FlutterLocalNotificationsPlugin();
+  // const AndroidInitializationSettings androidInit =
+  //     AndroidInitializationSettings('@mipmap/ic_launcher');
+  // const InitializationSettings initSettings = InitializationSettings(
+  //   android: androidInit,
+  // );
+  // await localPlugin.initialize(initSettings);
+  //
+  // const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+  //   'chat_messages',
+  //   'Chat Messages',
+  //   importance: Importance.high,
+  //   priority: Priority.high,
+  // );
+  // const NotificationDetails notifDetails = NotificationDetails(
+  //   android: androidDetails,
+  // );
+  //
+  // final String title = message.notification?.title ?? 'New message';
+  // final String body = message.notification?.body ?? '';
+  // final String? chatId = message.data['chatId'] as String?;
+  //
+  // await localPlugin.show(0, title, body, notifDetails, payload: chatId);
 }
 
 class NotificationService {

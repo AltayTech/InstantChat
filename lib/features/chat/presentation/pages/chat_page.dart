@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/di/injector.dart';
 import '../../../../core/navigation/app_navigator.dart';
@@ -87,6 +88,7 @@ class _ChatPageState extends State<ChatPage> {
                             (data?['name'] as String?) ??
                             (data?['email'] as String?) ??
                             'Chat';
+                        //  I add profile avatar and it is not used in this project, but can be used for future features
                         final photoUrl = data?['photoUrl'] as String?;
                         final isOnline = data?['isOnline'] == true;
                         return Row(
@@ -325,21 +327,7 @@ class _ChatPageState extends State<ChatPage> {
                                                   CrossAxisAlignment.end,
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                Text(
-                                                  msg['text'] ?? '',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyLarge
-                                                      ?.copyWith(
-                                                        color: isMine
-                                                            ? Theme.of(context)
-                                                                  .colorScheme
-                                                                  .onTertiaryContainer
-                                                            : Theme.of(context)
-                                                                  .colorScheme
-                                                                  .onSurfaceVariant,
-                                                      ),
-                                                ),
+                                                _MessageContent(msg: msg),
                                                 const SizedBox(height: 6),
                                                 Text(
                                                   time,
@@ -399,6 +387,22 @@ class _ChatPageState extends State<ChatPage> {
                       padding: const EdgeInsets.all(8),
                       child: Row(
                         children: [
+                          BlocListener<ChatBloc, ChatState>(
+                            listenWhen: (prev, curr) =>
+                                prev.errorMessage != curr.errorMessage,
+                            listener: (context, state) {
+                              final msg = state.errorMessage;
+                              if (msg != null) {
+                                ScaffoldMessenger.of(context)
+                                  ..hideCurrentSnackBar()
+                                  ..showSnackBar(SnackBar(content: Text(msg)));
+                                context.read<ChatBloc>().add(
+                                  const ChatClearError(),
+                                );
+                              }
+                            },
+                            child: const SizedBox.shrink(),
+                          ),
                           Expanded(
                             child: TextField(
                               controller: _controller,
@@ -428,6 +432,31 @@ class _ChatPageState extends State<ChatPage> {
                             tooltip: 'Emoji',
                             onPressed: () => _openEmojiPicker(innerContext),
                             icon: const Icon(Icons.emoji_emotions_outlined),
+                          ),
+                          IconButton(
+                            tooltip: 'Attach',
+                            onPressed: () =>
+                                _openAttachmentPicker(innerContext),
+                            icon: const Icon(Icons.attach_file),
+                          ),
+                          BlocBuilder<ChatBloc, ChatState>(
+                            buildWhen: (p, c) =>
+                                p.uploadProgress != c.uploadProgress,
+                            builder: (context, state) {
+                              final progress = state.uploadProgress;
+                              if (progress == null)
+                                return const SizedBox(width: 0, height: 0);
+                              return SizedBox(
+                                width: 64,
+                                height: 4,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(2),
+                                  child: LinearProgressIndicator(
+                                    value: progress / 100,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                           const SizedBox(width: 4),
                           ValueListenableBuilder<TextEditingValue>(
@@ -532,5 +561,122 @@ class _ChatPageState extends State<ChatPage> {
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOut,
     );
+  }
+
+  Future<void> _openAttachmentPicker(BuildContext innerContext) async {
+    final action = await showModalBottomSheet<_AttachmentAction>(
+      context: innerContext,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image_outlined),
+              title: const Text('Photo'),
+              onTap: () => Navigator.of(ctx).pop(_AttachmentAction.image),
+            ),
+            ListTile(
+              leading: const Icon(Icons.insert_drive_file_outlined),
+              title: const Text('File'),
+              onTap: () => Navigator.of(ctx).pop(_AttachmentAction.file),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+    if (action == null) return;
+    final uid = innerContext.read<AuthBloc>().state.user!.uid;
+    innerContext.read<ChatBloc>().add(
+      ChatPickAndUploadFile(
+        senderId: uid,
+        imageOnly: action == _AttachmentAction.image,
+      ),
+    );
+  }
+}
+
+class _MessageContent extends StatelessWidget {
+  const _MessageContent({required this.msg});
+
+  final Map<String, dynamic> msg;
+
+  @override
+  Widget build(BuildContext context) {
+    final type = msg['type'] as String? ?? 'text';
+    if (type == 'image' && msg['fileUrl'] != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.network(
+          msg['fileUrl'] as String,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _FallbackFileTile(msg: msg),
+        ),
+      );
+    }
+    if (type == 'file' && msg['fileUrl'] != null) {
+      return _FallbackFileTile(msg: msg);
+    }
+    return Text(
+      msg['text'] ?? '',
+      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+}
+
+enum _AttachmentAction { image, file }
+
+class _FallbackFileTile extends StatelessWidget {
+  const _FallbackFileTile({required this.msg});
+
+  final Map<String, dynamic> msg;
+
+  @override
+  Widget build(BuildContext context) {
+    final fileName = (msg['fileName'] as String?) ?? 'Attachment';
+    final fileUrl = (msg['fileUrl'] as String?) ?? '';
+    final size = (msg['fileSize'] as int?) ?? 0;
+    return InkWell(
+      onTap: () async {
+        final uri = Uri.tryParse(fileUrl);
+        if (uri != null) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.insert_drive_file_outlined),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(fileName, maxLines: 1, overflow: TextOverflow.ellipsis),
+                if (size > 0)
+                  Text(
+                    _formatBytes(size),
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatBytes(int bytes) {
+    const suffixes = ['B', 'KB', 'MB', 'GB'];
+    double value = bytes.toDouble();
+    int i = 0;
+    while (value >= 1024 && i < suffixes.length - 1) {
+      value /= 1024;
+      i++;
+    }
+    return value.toStringAsFixed(1) + ' ' + suffixes[i];
   }
 }

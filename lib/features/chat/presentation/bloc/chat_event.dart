@@ -27,3 +27,13 @@ class ChatDeleteMessage extends ChatEvent {
   const ChatDeleteMessage({required this.messageId});
   final String messageId;
 }
+
+class ChatPickAndUploadFile extends ChatEvent {
+  const ChatPickAndUploadFile({required this.senderId, this.imageOnly = false});
+  final String senderId;
+  final bool imageOnly;
+}
+
+class ChatClearError extends ChatEvent {
+  const ChatClearError();
+}
