@@ -58,18 +58,11 @@ lib/
   - Select platforms you will run on (Android, iOS, optionally Web, macOS, Windows)
   - This generates `lib/firebase_options.dart` (already present) and links your app(s)
 
-
 ## Firebase Console setup (what to configure in Firebase)
 Follow these steps in the Firebase Console for the services this app uses: Authentication, Firestore, and Cloud Messaging (FCM).
 
 ### 1) Create project and add apps
 - Create a new Firebase project (or use an existing one).
-- Add Android app:
-  - Package name: use your app id (current default is `com.example.rezatestoctapullapp`).
-  - Download `google-services.json` and place it at `android/app/google-services.json` (already present in this repo as a placeholder – replace with yours).
-- Add iOS app (if building for iOS):
-  - Bundle ID: your Runner bundle id from Xcode.
-  - Download `GoogleService-Info.plist` and add it to the iOS Runner target in Xcode.
 
 ### 2) Enable Authentication
 - Go to Firebase Console > Build > Authentication > Sign-in method.
@@ -136,6 +129,8 @@ Example HTTP v1 message (data payload opens a chat):
   }
 }
 ```
+run this again:
+- Configure: `flutterfire configure --project <your-firebase-project-id>`
 
 ## Push notifications end-to-end (what's implemented, step by step)
 
@@ -169,9 +164,11 @@ Example HTTP v1 message (data payload opens a chat):
 
 5) Deploy the function
 ```bash
+cd functions
 npm --prefix functions install
+cd..
 npm --prefix functions run build
-firebase deploy --only functions:sendChatMessageNotification
+firebase deploy --only functions:sendChatMessageNotification --project <PROJECT_ID>
 ```
 - Logs (to verify triggers and errors):
 ```bash
