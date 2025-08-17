@@ -39,11 +39,11 @@ class DefaultFirebaseOptions {
         );
     }
   }
-
+/// dommies data for web, android, ios, macos and windows platforms
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyACg-PnXRzyyzDbX-kXi4u90N-aTSefuvg',
-    appId: '1:2564682331:web:464e7479f6e2a94f59457e',
-    messagingSenderId: '2564682331',
+    apiKey: '',
+    appId: '',
+    messagingSenderId: '',
     projectId: 'instantchattest',
     authDomain: 'instantchattest.firebaseapp.com',
     storageBucket: 'instantchattest.firebasestorage.app',
@@ -51,35 +51,35 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB8TKfGEJRTJB8mZSDMcCu0DzBkUvGGpak',
-    appId: '1:2564682331:android:80beb1ed8db9b13759457e',
-    messagingSenderId: '2564682331',
+    apiKey: '',
+    appId: '',
+    messagingSenderId: '',
     projectId: 'instantchattest',
     storageBucket: 'instantchattest.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAzK9JM5l2wXU7PINod2zEQDfwYP8qiMrw',
-    appId: '1:2564682331:ios:b413d1418611bc9b59457e',
-    messagingSenderId: '2564682331',
+    apiKey: '',
+    appId: '',
+    messagingSenderId: '',
     projectId: 'instantchattest',
     storageBucket: 'instantchattest.firebasestorage.app',
     iosBundleId: 'com.example.rezatestoctapullapp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAzK9JM5l2wXU7PINod2zEQDfwYP8qiMrw',
-    appId: '1:2564682331:ios:b413d1418611bc9b59457e',
-    messagingSenderId: '2564682331',
+    apiKey: '',
+    appId: '',
+    messagingSenderId: '',
     projectId: 'instantchattest',
     storageBucket: 'instantchattest.firebasestorage.app',
     iosBundleId: 'com.example.rezatestoctapullapp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyACg-PnXRzyyzDbX-kXi4u90N-aTSefuvg',
-    appId: '1:2564682331:web:e03a687f35ab1b6259457e',
-    messagingSenderId: '2564682331',
+    apiKey: '',
+    appId: '',
+    messagingSenderId: '',
     projectId: 'instantchattest',
     authDomain: 'instantchattest.firebaseapp.com',
     storageBucket: 'instantchattest.firebasestorage.app',
