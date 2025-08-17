@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb_auth;
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../features/auth/data/auth_repository.dart';
@@ -28,6 +29,9 @@ Future<void> setupServiceLocator() async {
   serviceLocator.registerLazySingleton<FirebaseMessaging>(
     () => FirebaseMessaging.instance,
   );
+  serviceLocator.registerLazySingleton<FirebaseStorage>(
+    () => FirebaseStorage.instance,
+  );
 
   // Local storage
   serviceLocator.registerLazySingleton<HiveManager>(() => HiveManager());
@@ -54,6 +58,7 @@ Future<void> setupServiceLocator() async {
     () => ChatRepository(
       firestore: serviceLocator<FirebaseFirestore>(),
       hiveManager: serviceLocator<HiveManager>(),
+      storage: serviceLocator<FirebaseStorage>(),
     ),
   );
 
