@@ -41,48 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDYhT5uQl1MBa83bxMkpVXDIb984QR5kHg',
-    appId: '1:162699215281:web:35416d461e648e57d4fd90',
-    messagingSenderId: '162699215281',
-    projectId: 'rizatestoctapulapp',
-    authDomain: 'rizatestoctapulapp.firebaseapp.com',
-    storageBucket: 'rizatestoctapulapp.firebasestorage.app',
-    measurementId: 'G-HM6DQN85BL',
+    apiKey: 'AIzaSyB0X98Pvs_SJo4TH62galA_cOPaIPXuGuk',
+    appId: '1:218657324735:web:0ea14b7e5bb59caebfd00a',
+    messagingSenderId: '218657324735',
+    projectId: 'instantchatproject',
+    authDomain: 'instantchatproject.firebaseapp.com',
+    storageBucket: 'instantchatproject.firebasestorage.app',
+    measurementId: 'G-FBSEDE8CW4',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA9K9wURqnewVsBFw7FVBLkPnq_tFDhB-w',
-    appId: '1:162699215281:android:51e25d867ae1defcd4fd90',
-    messagingSenderId: '162699215281',
-    projectId: 'rizatestoctapulapp',
-    storageBucket: 'rizatestoctapulapp.firebasestorage.app',
+    apiKey: 'AIzaSyAn4m5j1k4OPs3Bcn04bzvJ-AgHp5-23GM',
+    appId: '1:218657324735:android:af298a3dffa3102fbfd00a',
+    messagingSenderId: '218657324735',
+    projectId: 'instantchatproject',
+    storageBucket: 'instantchatproject.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDoqA2-Zcud6DJ-vBCwEzUulrsmPav-tgk',
-    appId: '1:162699215281:ios:91242b290b29de48d4fd90',
-    messagingSenderId: '162699215281',
-    projectId: 'rizatestoctapulapp',
-    storageBucket: 'rizatestoctapulapp.firebasestorage.app',
+    apiKey: 'AIzaSyCmDZzDil-ujgPo1ItDwunE9w1XAR74H6E',
+    appId: '1:218657324735:ios:f4e0ca0c76ffeacabfd00a',
+    messagingSenderId: '218657324735',
+    projectId: 'instantchatproject',
+    storageBucket: 'instantchatproject.firebasestorage.app',
     iosBundleId: 'com.example.rezatestoctapullapp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDoqA2-Zcud6DJ-vBCwEzUulrsmPav-tgk',
-    appId: '1:162699215281:ios:91242b290b29de48d4fd90',
-    messagingSenderId: '162699215281',
-    projectId: 'rizatestoctapulapp',
-    storageBucket: 'rizatestoctapulapp.firebasestorage.app',
+    apiKey: 'AIzaSyCmDZzDil-ujgPo1ItDwunE9w1XAR74H6E',
+    appId: '1:218657324735:ios:f4e0ca0c76ffeacabfd00a',
+    messagingSenderId: '218657324735',
+    projectId: 'instantchatproject',
+    storageBucket: 'instantchatproject.firebasestorage.app',
     iosBundleId: 'com.example.rezatestoctapullapp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDYhT5uQl1MBa83bxMkpVXDIb984QR5kHg',
-    appId: '1:162699215281:web:74326cc3a4258f1fd4fd90',
-    messagingSenderId: '162699215281',
-    projectId: 'rizatestoctapulapp',
-    authDomain: 'rizatestoctapulapp.firebaseapp.com',
-    storageBucket: 'rizatestoctapulapp.firebasestorage.app',
-    measurementId: 'G-0032LH9WQ5',
+    apiKey: 'AIzaSyB0X98Pvs_SJo4TH62galA_cOPaIPXuGuk',
+    appId: '1:218657324735:web:90c9c4c52a7a0c1abfd00a',
+    messagingSenderId: '218657324735',
+    projectId: 'instantchatproject',
+    authDomain: 'instantchatproject.firebaseapp.com',
+    storageBucket: 'instantchatproject.firebasestorage.app',
+    measurementId: 'G-492DW3276S',
   );
+
 }
