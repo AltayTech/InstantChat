@@ -41,49 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyB0X98Pvs_SJo4TH62galA_cOPaIPXuGuk',
-    appId: '1:218657324735:web:0ea14b7e5bb59caebfd00a',
-    messagingSenderId: '218657324735',
-    projectId: 'instantchatproject',
-    authDomain: 'instantchatproject.firebaseapp.com',
-    storageBucket: 'instantchatproject.firebasestorage.app',
-    measurementId: 'G-FBSEDE8CW4',
+    apiKey: 'AIzaSyACg-PnXRzyyzDbX-kXi4u90N-aTSefuvg',
+    appId: '1:2564682331:web:464e7479f6e2a94f59457e',
+    messagingSenderId: '2564682331',
+    projectId: 'instantchattest',
+    authDomain: 'instantchattest.firebaseapp.com',
+    storageBucket: 'instantchattest.firebasestorage.app',
+    measurementId: 'G-K3FBHW3WWY',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAn4m5j1k4OPs3Bcn04bzvJ-AgHp5-23GM',
-    appId: '1:218657324735:android:af298a3dffa3102fbfd00a',
-    messagingSenderId: '218657324735',
-    projectId: 'instantchatproject',
-    storageBucket: 'instantchatproject.firebasestorage.app',
+    apiKey: 'AIzaSyB8TKfGEJRTJB8mZSDMcCu0DzBkUvGGpak',
+    appId: '1:2564682331:android:80beb1ed8db9b13759457e',
+    messagingSenderId: '2564682331',
+    projectId: 'instantchattest',
+    storageBucket: 'instantchattest.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCmDZzDil-ujgPo1ItDwunE9w1XAR74H6E',
-    appId: '1:218657324735:ios:f4e0ca0c76ffeacabfd00a',
-    messagingSenderId: '218657324735',
-    projectId: 'instantchatproject',
-    storageBucket: 'instantchatproject.firebasestorage.app',
+    apiKey: 'AIzaSyAzK9JM5l2wXU7PINod2zEQDfwYP8qiMrw',
+    appId: '1:2564682331:ios:b413d1418611bc9b59457e',
+    messagingSenderId: '2564682331',
+    projectId: 'instantchattest',
+    storageBucket: 'instantchattest.firebasestorage.app',
     iosBundleId: 'com.example.rezatestoctapullapp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCmDZzDil-ujgPo1ItDwunE9w1XAR74H6E',
-    appId: '1:218657324735:ios:f4e0ca0c76ffeacabfd00a',
-    messagingSenderId: '218657324735',
-    projectId: 'instantchatproject',
-    storageBucket: 'instantchatproject.firebasestorage.app',
+    apiKey: 'AIzaSyAzK9JM5l2wXU7PINod2zEQDfwYP8qiMrw',
+    appId: '1:2564682331:ios:b413d1418611bc9b59457e',
+    messagingSenderId: '2564682331',
+    projectId: 'instantchattest',
+    storageBucket: 'instantchattest.firebasestorage.app',
     iosBundleId: 'com.example.rezatestoctapullapp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyB0X98Pvs_SJo4TH62galA_cOPaIPXuGuk',
-    appId: '1:218657324735:web:90c9c4c52a7a0c1abfd00a',
-    messagingSenderId: '218657324735',
-    projectId: 'instantchatproject',
-    authDomain: 'instantchatproject.firebaseapp.com',
-    storageBucket: 'instantchatproject.firebasestorage.app',
-    measurementId: 'G-492DW3276S',
+    apiKey: 'AIzaSyACg-PnXRzyyzDbX-kXi4u90N-aTSefuvg',
+    appId: '1:2564682331:web:e03a687f35ab1b6259457e',
+    messagingSenderId: '2564682331',
+    projectId: 'instantchattest',
+    authDomain: 'instantchattest.firebaseapp.com',
+    storageBucket: 'instantchattest.firebasestorage.app',
+    measurementId: 'G-CFWVKPQZSE',
   );
 
 }

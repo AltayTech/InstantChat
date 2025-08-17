@@ -64,7 +64,7 @@ Follow these steps in the Firebase Console for the services this app uses: Authe
 
 ### 3) Create Firestore database
 - Go to Build > Firestore Database and create a database.
-- Choose your preferred location. Start in test mode for local development, then tighten rules for production.
+- Choose your preferred location. Start in test mode for local development.
 - Note:Collections this app expects:
   - `users/{uid}` docs with fields: `uid`, `email`, `name`, `photoUrl`, `isOnline`, `fcmToken`, `createdAt`, `updatedAt`.
   - `chats/{chatId}/messages/{messageId}` docs with fields: your message payload plus `createdAt`, `isDeleted`.
@@ -72,7 +72,7 @@ Follow these steps in the Firebase Console for the services this app uses: Authe
   
 ### 4) Enable Cloud Storage
 - Go to Firebase Console > Build > Storage and create a Storage bucket (choose your preferred location).
-- Start in test mode for local development, then tighten rules for production.
+- Start in test mode for local development.
 
 
 ### 5) Configure Cloud Messaging (FCM)
@@ -125,7 +125,7 @@ cd functions
 npm --prefix functions install
 cd..
 npm --prefix functions run build
-firebase deploy --only functions:sendChatMessageNotification --project <PROJECT_ID>
+firebase deploy --only functions --project <PROJECT_ID>
 ```
 - Logs (to verify triggers and errors):
 ```bash
