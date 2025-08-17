@@ -51,14 +51,7 @@ lib/
 - Flutter SDK 3.22+
 - Android Studio and/or Xcode
 
-2) Add Firebase to the app (one-time)
-- Install FlutterFire CLI: `dart pub global activate flutterfire_cli`
-- Login: `firebase login`
-- Configure: `flutterfire configure --project <your-firebase-project-id>`
-  - Select platforms you will run on (Android, iOS, optionally Web, macOS, Windows)
-  - This generates `lib/firebase_options.dart` (already present) and links your app(s)
-
-## Firebase Console setup (what to configure in Firebase)
+### 2) Firebase Console setup (what to configure in Firebase)
 Follow these steps in the Firebase Console for the services this app uses: Authentication, Firestore, Storage, and Cloud Messaging (FCM).
 
 ### 1) Create project and add apps
@@ -113,10 +106,14 @@ Example HTTP v1 message (data payload opens a chat):
   }
 }
 ```
-run this again(very important):
+### 3) Add Firebase to the app (one-time)
+- Install FlutterFire CLI: `dart pub global activate flutterfire_cli`
+- Login: `firebase login`
 - Configure: `flutterfire configure --project <your-firebase-project-id>`
+  - Select platforms you will run on (Android, iOS, optionally Web, macOS, Windows)
+  - This generates `lib/firebase_options.dart` (already present) and links your app(s)
 
-## Push notifications end-to-end (what's implemented, step by step)
+### 4) Push notifications end-to-end (what's implemented, step by step)
 
 1) Requirements
 - Firebase project on Blaze plan (needed to deploy Cloud Functions Gen 2).
